@@ -9,116 +9,38 @@ model: opus
 
 > Validates proposed design and architecture BEFORE implementation begins. Runs architect review plus optional docs validation. Blocks implementation if design has critical flaws.
 
-| Field | Value |
-|-------|-------|
-| Name | `pre-implementation` |
-| Version | 1.0.1 |
-| Domain | software |
-| Subdomain | design |
-| Tags | `pre-implementation`, `design`, `architecture`, `validation` |
+Duration: 3-10 minutes
+**Arguments**: `target` (required)
+## Pre-Flight Detection
 
-## Triggers
+- **design_docs_detected**: `test -n "$(find . \( -name '*design*' -o -name '*spec*' -o -name '*prd*' -o -name '*plan*' -o -name 'README.md' \) ! -path '*/node_modules/*' ! -path '*/dist/*' ! -path '*/.venv/*' -print -quit 2>/dev/null)"`
+## Execution
 
-- **Manual**
-  - Parameters:
-    - `target`: string
-
-## Stage Dependency Graph
-
+Ask user: **Sequential** (stop on first failure) or **Parallel** (run groups concurrently)?
 ```
-preflight (Pre-Flight Detection) [parallel]
-  -> review (Architecture & Docs Review) [parallel]
-    -> persist (Persist Results)
+Group 1 (parallel): architect + docs-validator
+Group 2 (sequential): assumption-review
+Group 3 (always): persist
 ```
+## Phases
 
-## Stages
+| # | Agent | Threshold | Gate | Condition |
+|---|-------|-----------|------|-----------|
+| 1 |  | threshold >= 75, on fail: stop | stop | — |
+| 2 |  | threshold >= 75, on fail: warn | stop | context.has_design_docs |
+| 3 |  | threshold >= 70, on fail: warn | stop | — |
+| 4 | workflow-synthesis@latest | threshold >= 0, on fail: warn | stop | — |
 
-### Stage 1: Pre-Flight Detection
+**Architecture Review**: Architectural fit with existing codebase; Design quality and complexity; Scope bounds (LOC, files, dependencies); Completeness of error handling and data flow
+**Documentation Validation**: Design doc completeness; API contract clarity; Data flow documentation
+**Epistemic Assumption Review** (after architect): Implicit assumptions in proposed design; Overclaiming of capabilities or guarantees; Reasoning quality behind architectural decisions
+**Persist Results**: Synthesize findings and persist to tracker
+## Scoring
 
-- **ID:** `preflight`
-- **Execution:** parallel
+**Method**: weighted_average
+ — architect: 55%, assumption-review: 20%, docs-validator: 25%
+## Results Submission
 
-**Steps:**
-
-1. **Detect design docs** [continue-on-error]
-   ```bash
-   find . \( -iname "*design*" -o -iname "*spec*" -o -iname "*prd*" -o -iname "*plan*" -o -name "README.md" \) ! -path "*/node_modules/*" ! -path "*/dist/*" ! -path "*/.venv/*" -print -quit 2>/dev/null | grep -q . && echo "DETECTED" || echo "NOT_DETECTED"
-   ```
-
-**Gate:**
-- On failure: warn
-
-### Stage 2: Architecture & Docs Review
-
-- **ID:** `review`
-- **Depends on:** `preflight`
-- **Execution:** parallel
-
-**Agents:**
-- `pre-implementation-architect`
-- `docs-validator` (if `stages.preflight.steps['Detect design docs'].output == 'DETECTED'`)
-
-**Gate:**
-- Threshold: 75
-- Aggregate: min
-- On failure: abort
-
-### Stage 3: Persist Results
-
-- **ID:** `persist`
-- **Depends on:** `review`
-
-**Agents:**
-- `workflow-synthesis`
-
-**Gate:**
-- Threshold: 0
-- On failure: warn
-
-## Postflight
-
-### Tracker Persistence
-
-After all stages complete, save results to the tracker using `save_run`:
-
-- **definition_type:** `pipeline`
-- **definition_name:** `pre-implementation`
-- **definition_version:** `1.0.1`
-- **workflow_type:** `pre-implementation`
-- **project:** `$ARGUMENTS` (the target project name)
-- **validators:** Collect each validator/agent result with name, score, status, model, and token usage
-- **recommendations:** Collect ALL issues from ALL stages into a single recommendations array with validator, title, priority, severity, failure_code, file_path, line_number, description, and type
-- **summary:** `{ all_gates_passed: <true if all abort-gates passed>, average_score: <mean of all validator scores> }`
-
-This MUST be a single bulk call — do NOT create individual issues. The `save_run` tool auto-increments the run number and detects regressions from prior runs.
-
-**Token Metrics:**
-
-Get token metrics from the agent-metrics buffer before saving:
-```bash
-agent-metrics buffer list --since 15m -f tracker
-```
-
-Map buffer fields to tracker: `input_tokens`, `output_tokens`, `cache_creation_tokens`, `cache_read_tokens`, `total_effective_tokens`, and `model`.
-
-**Field Mappings:**
-
-| Source | Tracker Field | Notes |
-|--------|---------------|-------|
-| `stage.gate.score` | `agents[].score` | Total score |
-| `stage.gate.decision` | `agents[].decision` | Agent decision |
-| `agent-metrics` | `agents[].model` | Model identifier |
-| `stage.output.issues` | `recommendations[]` | Flatten nested structure |
-
-**Verification:** After saving, compare `json.summary.total_issues` with the saved count. Alert if mismatch.
-
-### On Success
-
-- **PROCEED — Design approved. Ready for implementation.**
-
-### On Failure
-
-- **REVISE — Critical design flaws. Refine before implementing.**
-
----
-*Generated from PDL v1.0.1 | Pipeline: pre-implementation*
+Write markdown report to: `{{ target_path }}/{{ report_file }}`
+Save ALL findings to tracker via `mcp_uluops-tracker_save_run` with project=`{{ target_name }}`, workflow_type=`pre-implementation`, definition_type=`workflow`, definition_name=`pre-implementation`, definition_version=`2.0.1`. Include validators array (name, score, status, model) and recommendations array (validator, title, priority, severity, description, file_path, line_number). Each file:line reference becomes a separate recommendation. Priority: blocking=critical, warnings=suggested, post-ship=backlog.
+After saving, query tracker and compare counts. Mismatches from cross-phase deduplication are expected — warn only, do not re-attempt.

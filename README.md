@@ -1,14 +1,13 @@
-# Examples
+# Agents & Pipelines
 
-The agents, commands and pipelines referenced in the blog post. These are the definitions used in the Automated Doubt development process.
+Agents, commands and pipelines for Claude Code and other harnesses. These are the definitions used in the [Automated Doubt](https://alexself.dev/blog/automated-doubt) development process.
 
 ## Structure
 
 ```
-examples/
-  agents/     # Agent definitions (the system prompts that define each agent's lens)
-  commands/   # Command definitions (slash commands that invoke agents in Claude Code)
-  pipelines/  # Pipeline definitions (multi-agent workflows that run agents in sequence)
+agents/     # Agent definitions (the system prompts that define each agent's lens)
+commands/   # Command definitions (slash commands that invoke agents in Claude Code)
+pipelines/  # Pipeline definitions (multi-agent workflows that run agents in sequence)
 ```
 
 ## How to invoke

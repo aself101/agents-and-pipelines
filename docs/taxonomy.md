@@ -86,8 +86,10 @@ measurement.
 | **Evolution Analyst** | Stability | — |
 | **Threshold Calibration** | Calibration | — |
 
-No agent claims Interaction or the epistemic audit as its primary dimension. Both
-remain open territory.
+No agent claims Interaction or the epistemic audit as its primary dimension, but the
+two are not in the same state. Interaction has secondary coverage from the Coverage
+Gap Analyzer. The epistemic audit has none at all — it is the emptiest cell in the
+layer, and the one asking the question the layer exists to ask.
 
 ## Choosing a lens
 

@@ -1,10 +1,10 @@
 ---
-name: validate
-description: Validates code quality, standards compliance, and test coverage. Use after each implementation phase.
+name: software-architecture-expert-analyst
+description: Performs software architecture evaluation on codebases, specifications, and patent claims. Assesses component boundaries, pattern fitness, specification-implementation correspondence, dependency structure, and architectural risk. Decision SOUND/STRAINED/COMPROMISED/UNSOUND.
 ---
 
-# Code Validator v1
-Validates code quality, standards compliance, and test coverage. Use after each implementation phase.
+# Software Architecture Expert Analyst v1
+Performs software architecture evaluation on codebases, specifications, and patent claims. Assesses component boundaries, pattern fitness, specification-implementation correspondence, dependency structure, and architectural risk. Decision SOUND/STRAINED/COMPROMISED/UNSOUND.
 
 ## What's New in v1
 
@@ -17,12 +17,13 @@ Validates code quality, standards compliance, and test coverage. Use after each 
 
 ## Arguments
 
-**Usage:** `/agents:validate <directory>`
+**Usage:** `/agents:software-architecture-expert-analyst <directory>`
 
 **Examples:**
-- `/agents:validate ./services/auth-service`
-- `/agents:validate ./packages/api`
-- `/agents:validate .`
+- `/agents:software-architecture-expert-analyst src/`
+- `/agents:software-architecture-expert-analyst docs/architecture.md`
+- `/agents:software-architecture-expert-analyst uluops-specifications/ip/failure-taxonomy`
+- `/agents:software-architecture-expert-analyst udl/adl/v3/code-validator.agent.yaml`
 
 **Target Directory:** $ARGUMENTS
 
@@ -32,8 +33,8 @@ Validates code quality, standards compliance, and test coverage. Use after each 
 ## Pre-Flight
 
 ```bash
-echo "Running code validation on $ARGUMENTS..."
-echo "========================================"
+echo "Running Software Architecture Expert analysis on $ARGUMENTS..."
+echo "=============================================================="
 ```
 
 Verify the target directory exists:
@@ -51,7 +52,7 @@ cd "$ARGUMENTS" && pwd
 Check path exists:
 
 ```bash
-[ -e "$ARGUMENTS" ] && echo "✓ $ARGUMENTS exists" || echo "Target directory does not exist"
+[ -e "$ARGUMENTS" ] && echo "✓ $ARGUMENTS exists" || echo "Target file or directory does not exist"
 ```
 
 
@@ -59,10 +60,10 @@ Check path exists:
 
 ## Agent Invocation
 
-Run the Code Validator agent on the validated target directory:
+Run the Software Architecture Expert Analyst agent on the validated target directory:
 
-**Agent:** code-validator-agent.md
-**Model:** Sonnet
+**Agent:** software-architecture-expert-analyst-agent.md
+**Model:** Opus
 **Target:** $ARGUMENTS
 
 
@@ -74,11 +75,10 @@ Critical issues that trigger immediate FAIL regardless of score:
 
 | ID | Condition |
 |----|-----------|
-| **AF-001** | Security vulnerabilities detected |
-| **AF-002** | Missing error handling in critical paths |
-| **AF-003** | Code does not function |
-| **AF-004** | Missing tests for core functionality |
-| **AF-005** | Breaking changes without migration path |
+| **AF-001** | Patterns identified by technology labels rather than structural properties |
+| **AF-002** | Boundaries identified by file/directory structure without coupling analysis |
+| **AF-003** | Novelty credited from descriptive specificity rather than structural differentiation |
+| **AF-004** | Specification claims accepted without structural verification |
 
 ---
 
@@ -97,7 +97,7 @@ Critical issues that trigger immediate FAIL regardless of score:
 
 ### On Success
 
-Validation passed with score >= 70
+Architecture SOUND — structural design is well-founded for its stated purpose
 
 ```bash
 exit 0
@@ -105,7 +105,7 @@ exit 0
 
 ### On Failure
 
-Validation failed. Review issues above.
+Architecture assessment requires attention — structural issues identified
 
 ```bash
 exit 1
@@ -118,18 +118,18 @@ exit 1
 ## PERSIST TO TRACKER (Required)
 
 > **IMPORTANT:** Save to tracker IMMEDIATELY after agent completes, BEFORE presenting the summary to the user. The workflow is not complete until results are persisted.
-**1. Save to tracker (REQUIRED):**
-
+**1. Get token metrics from buffer:**
 ```bash
 agent-metrics buffer list --since 5m -f tracker
 ```
 
+**2. Save to tracker (DO THIS FIRST):**
+
 mcp__uluops-tracker__save_run
 
-**2. Verify saved:** Compare `json.summary.total_issues` with saved count.
+**3. Verify saved:** Compare `json.summary.total_issues` with saved count.
 
-**3. THEN present summary to user.**
-
+**4. THEN present summary to user.**
 
 ### Field Mappings
 
@@ -137,7 +137,7 @@ mcp__uluops-tracker__save_run
 | Tracker Field | Value | Notes |
 |---------------|-------|-------|
 | `definition_type` | `command` | From CDL interface |
-| `definition_name` | `validate` | From CDL interface |
+| `definition_name` | `software-architecture-expert-analyst` | From CDL interface |
 | `definition_version` | `1.0.2` | From CDL interface |
 
 **From JSON OUTPUT to Tracker:**
@@ -166,5 +166,5 @@ mcp__uluops-tracker__save_run
 ## Source
 
 **CDL Schema:** `udl/definition-languages/cdl-schema-v1_3_0.json`
-**CDL Source:** `/Users/aself/uluops/uluops-agent-workflows/udl/cdl/v1/validate.command.yaml`
-**Agent:** `agents/code-validator-agent.md`
+**CDL Source:** `/Users/aself/uluops/uluops-agent-workflows/udl/cdl/v1/software-architecture-expert-analyst.command.yaml`
+**Agent:** `agents/software-architecture-expert-analyst-agent.md`

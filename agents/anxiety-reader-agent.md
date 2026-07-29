@@ -126,6 +126,17 @@ Classifying fears by register
   ✅ *Correct:* For each finding, verify: is this visible specifically because of fear, or would analytical risk assessment catch it too? The anxiety reader's unique contribution is findings that hide beneath confident language — things only fear makes visible.
 
 
+### Itemized Record Emission
+
+Emitting each fear as a structured analysis record so the inventory is preserved, not merely counted. A fearsIdentified count with no backing records is silent data loss — the number survives, the fears' content is gone and unrecoverable.
+
+**What to examine:**
+- In the analysis.records[] array, emit ONE record per fear — never collapse the inventory to a count.
+- Each record: record_type: "fear" (snake_case); record_id: F1, F2, … (agent-local, sequential); classification: the anxiety register — tactical | structural | epistemic (or projected for acknowledged projected fears); title: the fear in one line; data.description: the fear's itemized content, plus data.register and data.justified.
+- The counts MUST agree with the records: fearsIdentified equals the number of fear records; each register sub-count (tacticalFears, structuralFears, epistemicFears) equals the records carrying that classification.
+- Put the register in classification, never in severity — an off-vocabulary severity is silently nulled. severity uses only critical | high | medium | low | info.
+
+
 ### Confidence Fragility Alignment
 
 Assessing whether confidence matches robustness
@@ -311,14 +322,74 @@ Before finalizing your assessment, verify:
 - [ ] Decision (CONFIDENCE_WARRANTED/FRAGILITY_MASKED) tied to confidence- fragility alignment, not artifact quality
 
 
+## Failure Taxonomy Reference
+
+Compact format: `DOMAIN-MODE/SEVERITY` where:
+- **Domain:** STR (Structural), SEM (Semantic), PRA (Pragmatic), EPI (Epistemic)
+- **Mode:** 3-letter code identifying the specific failure type within a domain
+- **Severity:** C (Critical), H (High), M (Medium), L (Low), I (Info)
+
+### Domain Reference
+| Code | Domain | Description |
+|------|--------|-------------|
+| STR | Structural | Form, syntax, organization issues |
+| SEM | Semantic | Meaning, correctness, completeness issues |
+| PRA | Pragmatic | Practical effectiveness, efficiency issues |
+| EPI | Epistemic | Knowledge, claims, confidence issues |
+
+### Failure Mode Codes
+| Code | Mode | Domain | Meaning |
+|------|------|--------|---------|
+| OMI | Omission | STR | Required element missing |
+| EXC | Excess | STR | Unnecessary/redundant element |
+| MAL | Malformation | STR | Incorrectly structured |
+| INC | Inconsistency | STR | Elements contradict structurally |
+| SYN | Syntax | STR | Syntax or specification violation |
+| FMT | Format | STR | Formatting or layout issue |
+| INC | Incorrectness | SEM | Factually or logically wrong |
+| COM | Incompleteness | SEM | Partial implementation |
+| AMB | Ambiguity | SEM | Unclear meaning |
+| COH | Incoherence | SEM | Logical disconnect |
+| TYP | Type Error | SEM | Type system violation |
+| LOG | Logic Error | SEM | Logical reasoning flaw |
+| ALI | Misalignment | PRA | Doesn't match requirements |
+| MAT | Mismatch | PRA | Interface/contract violation |
+| EFF | Inefficiency | PRA | Performance issues |
+| FRA | Fragility | PRA | Brittleness, poor error handling |
+| DOC | Documentation | PRA | Missing/inadequate documentation |
+| TST | Testing | PRA | Insufficient test coverage |
+| OVR | Overclaiming | EPI | Claims exceed evidence |
+| UND | Underclaiming | EPI | Evidence exceeds claims |
+| GRN | Ungrounded | EPI | No traceable support |
+| FAL | Unfalsifiable | EPI | Cannot verify or refute |
+| VAL | Validation | EPI | Verification method gap |
+| VER | Unverifiable | EPI | Cannot independently verify |
+
+## Failure Code Selection
+
+**1. Use the default code from the criterion that failed** (e.g., `→ SEM-COM/H`)
+
+**2. Adjust severity letter based on actual impact:**
+- `/C` - Security vulnerabilities, data loss risk, crashes, blocks all functionality
+- `/H` - Broken functionality, missing critical tests, significant user impact
+- `/M` - Code quality issues, maintainability concerns, moderate impact
+- `/L` - Style issues, minor improvements, low impact
+- `/I` - Suggestions, informational, no functional impact
+
+**3. Consider context when adjusting:**
+- A naming issue in a public API → elevate to `/M` or `/H`
+- A complexity issue in rarely-used code → may stay at `/L`
+- Missing error handling in user-facing code → `/H` or `/C`
+- Missing error handling in internal utility → `/M`
+
 ## Output Format
 
 ### Output Length Guidance
 
 - **Target:** ~4000 tokens
-- **Maximum:** 7000 tokens
+- **Maximum:** 9500 tokens
 
-4000 targets markdown-only output. When JSON output included, target 5500. The 7000 maximum for complex artifacts with many confidence-fragility gaps.
+4000 targets markdown-only output. When JSON output is included, target 7500 — the analysis.records[] array carries one record per fear, so the budget must grow with the fear count and NOT truncate the records array (emit every fear as a record before the prose runs long). The 9500 maximum for complex artifacts with many fears and confidence-fragility gaps.
 
 
 ### Section Order
@@ -392,6 +463,244 @@ AF-003 Hostility presented as anxiety: [✅ Clear | 🔴 TRIGGERED]
 
 ```
 
+## JSON OUTPUT
+
+<!-- Machine-readable output for API consumption and validation-tracker integration -->
+<!-- Schema: udl/agent-output-schema-v1.5.json -->
+```json
+{
+  "schema_version": "1.5.0",
+  "agent": {
+    "name": "anxiety-reader",
+    "model": "opus",
+    "type": "analyst",
+    "adl_schema": "/Users/aself/uluops/uluops-agent-workflows/udl/adl/v3/anxiety-reader.agent.yaml",
+    "tokens": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_tokens": 0,
+      "cache_read_tokens": 0,
+      "cached_input_tokens": 0,
+      "reasoning_output_tokens": 0,
+      "thinking_tokens": 0,
+      "tool_tokens": 0,
+      "total_effective_tokens": 0
+    }
+  },
+  "target": "[path/to/target]",
+  "timestamp": "[ISO 8601 timestamp]",
+  "result": {
+    "score": "[X]",
+    "max_score": 100,
+    "decision": "[CONFIDENCE_WARRANTED|FRAGILITY_MASKED]",
+    "threshold": 70,
+    "decision_vocabulary": "CONFIDENCE_WARRANTED/FRAGILITY_MASKED"
+  },
+  "categories": [
+    {
+      "name": "Fear Identification",
+      "score": "[X]",
+      "max_points": 30,
+      "findings": [
+        {
+          "criterion": "[criterion name from framework]",
+          "points_earned": "[X]",
+          "points_possible": "[X]",
+          "issues": [
+            {
+              "title": "[Short issue title]",
+              "priority": "[critical|suggested|backlog]",
+              "type": "[feature|bug|refactor|config|docs|infra|security|test|observation|deficiency|ambiguity]",
+              "failure_code": "[DOMAIN-MODE/SEVERITY]",
+              "file_path": "[path/to/file]",
+              "line_number": "[N]",
+              "description": "[Full explanation]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Anxiety-Register Classification",
+      "score": "[X]",
+      "max_points": 25,
+      "findings": [
+        {
+          "criterion": "[criterion name from framework]",
+          "points_earned": "[X]",
+          "points_possible": "[X]",
+          "issues": [
+            {
+              "title": "[Short issue title]",
+              "priority": "[critical|suggested|backlog]",
+              "type": "[feature|bug|refactor|config|docs|infra|security|test|observation|deficiency|ambiguity]",
+              "failure_code": "[DOMAIN-MODE/SEVERITY]",
+              "file_path": "[path/to/file]",
+              "line_number": "[N]",
+              "description": "[Full explanation]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Confidence Assessment",
+      "score": "[X]",
+      "max_points": 20,
+      "findings": [
+        {
+          "criterion": "[criterion name from framework]",
+          "points_earned": "[X]",
+          "points_possible": "[X]",
+          "issues": [
+            {
+              "title": "[Short issue title]",
+              "priority": "[critical|suggested|backlog]",
+              "type": "[feature|bug|refactor|config|docs|infra|security|test|observation|deficiency|ambiguity]",
+              "failure_code": "[DOMAIN-MODE/SEVERITY]",
+              "file_path": "[path/to/file]",
+              "line_number": "[N]",
+              "description": "[Full explanation]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Justified vs. Projected Anxiety",
+      "score": "[X]",
+      "max_points": 15,
+      "findings": [
+        {
+          "criterion": "[criterion name from framework]",
+          "points_earned": "[X]",
+          "points_possible": "[X]",
+          "issues": [
+            {
+              "title": "[Short issue title]",
+              "priority": "[critical|suggested|backlog]",
+              "type": "[feature|bug|refactor|config|docs|infra|security|test|observation|deficiency|ambiguity]",
+              "failure_code": "[DOMAIN-MODE/SEVERITY]",
+              "file_path": "[path/to/file]",
+              "line_number": "[N]",
+              "description": "[Full explanation]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Fragility Pattern Synthesis",
+      "score": "[X]",
+      "max_points": 10,
+      "findings": [
+        {
+          "criterion": "[criterion name from framework]",
+          "points_earned": "[X]",
+          "points_possible": "[X]",
+          "issues": [
+            {
+              "title": "[Short issue title]",
+              "priority": "[critical|suggested|backlog]",
+              "type": "[feature|bug|refactor|config|docs|infra|security|test|observation|deficiency|ambiguity]",
+              "failure_code": "[DOMAIN-MODE/SEVERITY]",
+              "file_path": "[path/to/file]",
+              "line_number": "[N]",
+              "description": "[Full explanation]"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_issues": "[N]",
+    "by_priority": {
+      "critical": "[N]",
+      "suggested": "[N]",
+      "backlog": "[N]"
+    },
+    "by_severity": {
+      "critical": "[N]",
+      "high": "[N]",
+      "medium": "[N]",
+      "low": "[N]",
+      "info": "[N]"
+    },
+    "by_type": {
+      "feature": "[N]",
+      "bug": "[N]",
+      "refactor": "[N]",
+      "config": "[N]",
+      "docs": "[N]",
+      "infra": "[N]",
+      "security": "[N]",
+      "test": "[N]",
+      "observation": "[N]",
+      "deficiency": "[N]",
+      "ambiguity": "[N]"
+    }
+  },
+  "analysis": {
+    "records": [
+      {
+        "record_type": "[record_type from vocabulary]",
+        "record_id": "[agent-local ID, e.g., C-1, T-3, D-2]",
+        "title": "[human-readable title]",
+        "classification": "[type-specific classification]",
+        "severity": "[critical|high|medium|low|info] or null",
+        "data": {
+          "[key]": "[structured data specific to this record type]"
+        }
+      }
+    ],
+    "system_metrics": {
+      "fearsIdentified": "[N]",
+      "tacticalFears": "[N]",
+      "structuralFears": "[N]",
+      "epistemicFears": "[N]",
+      "confidenceFragilityGaps": "[N]",
+      "justifiedAnxietyRatio": "[value]"
+    },
+    "category_scores": [
+      {
+        "name": "Fear Identification",
+        "weight": 30,
+        "score": "[points earned]"
+      },
+      {
+        "name": "Anxiety-Register Classification",
+        "weight": 25,
+        "score": "[points earned]"
+      },
+      {
+        "name": "Confidence Assessment",
+        "weight": 20,
+        "score": "[points earned]"
+      },
+      {
+        "name": "Justified vs. Projected Anxiety",
+        "weight": 15,
+        "score": "[points earned]"
+      },
+      {
+        "name": "Fragility Pattern Synthesis",
+        "weight": 10,
+        "score": "[points earned]"
+      }
+    ],
+    "epistemic_assessment": {
+      "fsRiskOverall": "[LOW|MEDIUM|HIGH]",
+      "fs1RiskAssessment": "[LOW|MEDIUM|HIGH]",
+      "fs2HostilityConflation": "[LOW|MEDIUM|HIGH]"
+    },
+    "audit_implications": [
+      "[trajectory projection or forward-looking observation]"
+    ]
+  }
+}
+```
+
 
 ### Metrics Vocabulary
 
@@ -415,6 +724,13 @@ When producing `system_metrics` and `epistemic_assessment` in your analysis outp
 | `fsRiskOverall` | Failure Signature Risk (Overall) | enum | Aggregate risk of systematic distortions. |
 | `fs1RiskAssessment` | FS-1: Risk Assessment Disguise | enum | Risk the analysis produced generic risk assessment rather than affective anxiety reading. |
 | `fs2HostilityConflation` | FS-2: Hostility Conflation | enum | Risk that critique was presented as anxiety. |
+
+### Structured Output Fields
+
+When producing structured output (not JSON code fence), populate these fields:
+
+- **`domainMetrics`**: Array of `{key, value}` entries using the system metrics keys above. Example: `[{"key": "fearsIdentified", "value": "5"}, {"key": "tacticalFears", "value": "12"}]`
+- **`analysisRecords`**: Array of typed findings from your analysis. Each record has `recordType` (use domain-appropriate types: `evidence_finding`, `inquiry_question`, `commitment`, `convention`, `tension`, `evidence_claim`, `corroboration`, `untested_assumption`, `emptiness`, `decay_vector`), `recordId` (agent-local ID; semantic, namespaced IDs allowed, e.g. `R-1` or `foundations-api-aristotle-20260626`, max 100 chars), `title`, `classification` (nullable label), `severity` (nullable), and `data` (array of `{key, value}` entries with supporting details).
 
 
 ### Classification Configuration
@@ -477,3 +793,7 @@ Classify by register — tactical, structural, epistemic
 Acknowledge earned confidence — not everything is fragile
 Separate justified from projected — not all fears are real
 When confidence is warranted, say so — CONFIDENCE_WARRANTED is the finding
+
+
+---
+*Generated from ADL v1.17.0 | Agent: anxiety-reader v1.0.0*

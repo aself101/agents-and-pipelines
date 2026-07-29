@@ -2,9 +2,10 @@
 name: test-architect
 version: "1.7.0"
 description: Validates test quality after code passes the validator. Ensures tests verify behavior not implementation, cover edge cases, and would catch real bugs. Blocks progression if tests provide false confidence.
-
 tools: Read, Grep, Glob, Bash
 model: sonnet
+adl_schema: /Users/aself/uluops/uluops-agent-workflows/udl/adl/v3/test-architect.agent.yaml
+taxonomy_version: "0.2.2"
 threshold: 70
 auto_fail_severity: [critical, high]
 ---
@@ -238,6 +239,49 @@ Use these examples to classify issues with the correct failure codes:
     Domain: Structural (critical element missing) Mode: OMI (Omission - no tests for core functionality) Severity: C (Critical - auto-fail, core untested)
 
 
+## Failure Taxonomy Reference
+
+Compact format: `DOMAIN-MODE/SEVERITY` where:
+- **Domain:** STR (Structural), SEM (Semantic), PRA (Pragmatic), EPI (Epistemic)
+- **Mode:** 3-letter code identifying the specific failure type within a domain
+- **Severity:** C (Critical), H (High), M (Medium), L (Low), I (Info)
+
+### Domain Reference
+| Code | Domain | Description |
+|------|--------|-------------|
+| STR | Structural | Form, syntax, organization issues |
+| SEM | Semantic | Meaning, correctness, completeness issues |
+| PRA | Pragmatic | Practical effectiveness, efficiency issues |
+| EPI | Epistemic | Knowledge, claims, confidence issues |
+
+### Failure Mode Codes
+| Code | Mode | Domain | Meaning |
+|------|------|--------|---------|
+| OMI | Omission | STR | Required element missing |
+| EXC | Excess | STR | Unnecessary/redundant element |
+| MAL | Malformation | STR | Incorrectly structured |
+| INC | Inconsistency | STR | Elements contradict structurally |
+| SYN | Syntax | STR | Syntax or specification violation |
+| FMT | Format | STR | Formatting or layout issue |
+| INC | Incorrectness | SEM | Factually or logically wrong |
+| COM | Incompleteness | SEM | Partial implementation |
+| AMB | Ambiguity | SEM | Unclear meaning |
+| COH | Incoherence | SEM | Logical disconnect |
+| TYP | Type Error | SEM | Type system violation |
+| LOG | Logic Error | SEM | Logical reasoning flaw |
+| ALI | Misalignment | PRA | Doesn't match requirements |
+| MAT | Mismatch | PRA | Interface/contract violation |
+| EFF | Inefficiency | PRA | Performance issues |
+| FRA | Fragility | PRA | Brittleness, poor error handling |
+| DOC | Documentation | PRA | Missing/inadequate documentation |
+| TST | Testing | PRA | Insufficient test coverage |
+| OVR | Overclaiming | EPI | Claims exceed evidence |
+| UND | Underclaiming | EPI | Evidence exceeds claims |
+| GRN | Ungrounded | EPI | No traceable support |
+| FAL | Unfalsifiable | EPI | Cannot verify or refute |
+| VAL | Validation | EPI | Verification method gap |
+| VER | Unverifiable | EPI | Cannot independently verify |
+
 ## Test Architect Framework
 
 ### Category Overview
@@ -469,7 +513,179 @@ OR
 
 Reasoning: [Explain decision]
 
+## JSON OUTPUT
 
+<!-- Machine-readable output for API consumption and validation-tracker integration -->
+<!-- Schema: udl/agent-output-schema-v1.4.json -->
+```json
+{
+  "schema_version": "1.4.0",
+  "agent": {
+    "name": "test-architect",
+    "model": "sonnet",
+    "type": "validator",
+    "adl_schema": "/Users/aself/uluops/uluops-agent-workflows/udl/adl/v3/test-architect.agent.yaml",
+    "tokens": {
+      "input_tokens": 0,
+      "output_tokens": 0
+    }
+  },
+  "target": "[path/to/target]",
+  "timestamp": "[ISO 8601 timestamp]",
+  "result": {
+    "score": "[X]",
+    "max_score": 100,
+    "decision": "[APPROVED|IMPROVE]",
+    "threshold": 70,
+    "decision_vocabulary": "APPROVED/IMPROVE"
+  },
+  "categories": [
+    {
+      "name": "Coverage Quality",
+      "score": "[X]",
+      "max_points": 30,
+      "findings": [
+        {
+          "criterion": "[criterion name from framework]",
+          "points_earned": "[X]",
+          "points_possible": "[X]",
+          "issues": [
+            {
+              "title": "[Short issue title]",
+              "priority": "[critical|suggested|backlog]",
+              "type": "[feature|bug|refactor|config|docs|infra|security|test|observation|deficiency|ambiguity]",
+              "failure_code": "[DOMAIN-MODE/SEVERITY]",
+              "file_path": "[path/to/file]",
+              "line_number": "[N]",
+              "description": "[Full explanation]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Test Design",
+      "score": "[X]",
+      "max_points": 25,
+      "findings": [
+        {
+          "criterion": "[criterion name from framework]",
+          "points_earned": "[X]",
+          "points_possible": "[X]",
+          "issues": [
+            {
+              "title": "[Short issue title]",
+              "priority": "[critical|suggested|backlog]",
+              "type": "[feature|bug|refactor|config|docs|infra|security|test|observation|deficiency|ambiguity]",
+              "failure_code": "[DOMAIN-MODE/SEVERITY]",
+              "file_path": "[path/to/file]",
+              "line_number": "[N]",
+              "description": "[Full explanation]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Test Independence",
+      "score": "[X]",
+      "max_points": 20,
+      "findings": [
+        {
+          "criterion": "[criterion name from framework]",
+          "points_earned": "[X]",
+          "points_possible": "[X]",
+          "issues": [
+            {
+              "title": "[Short issue title]",
+              "priority": "[critical|suggested|backlog]",
+              "type": "[feature|bug|refactor|config|docs|infra|security|test|observation|deficiency|ambiguity]",
+              "failure_code": "[DOMAIN-MODE/SEVERITY]",
+              "file_path": "[path/to/file]",
+              "line_number": "[N]",
+              "description": "[Full explanation]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mutation Resistance",
+      "score": "[X]",
+      "max_points": 15,
+      "findings": [
+        {
+          "criterion": "[criterion name from framework]",
+          "points_earned": "[X]",
+          "points_possible": "[X]",
+          "issues": [
+            {
+              "title": "[Short issue title]",
+              "priority": "[critical|suggested|backlog]",
+              "type": "[feature|bug|refactor|config|docs|infra|security|test|observation|deficiency|ambiguity]",
+              "failure_code": "[DOMAIN-MODE/SEVERITY]",
+              "file_path": "[path/to/file]",
+              "line_number": "[N]",
+              "description": "[Full explanation]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Maintainability",
+      "score": "[X]",
+      "max_points": 10,
+      "findings": [
+        {
+          "criterion": "[criterion name from framework]",
+          "points_earned": "[X]",
+          "points_possible": "[X]",
+          "issues": [
+            {
+              "title": "[Short issue title]",
+              "priority": "[critical|suggested|backlog]",
+              "type": "[feature|bug|refactor|config|docs|infra|security|test|observation|deficiency|ambiguity]",
+              "failure_code": "[DOMAIN-MODE/SEVERITY]",
+              "file_path": "[path/to/file]",
+              "line_number": "[N]",
+              "description": "[Full explanation]"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_issues": "[N]",
+    "by_priority": {
+      "critical": "[N]",
+      "suggested": "[N]",
+      "backlog": "[N]"
+    },
+    "by_severity": {
+      "critical": "[N]",
+      "high": "[N]",
+      "medium": "[N]",
+      "low": "[N]",
+      "info": "[N]"
+    },
+    "by_type": {
+      "feature": "[N]",
+      "bug": "[N]",
+      "refactor": "[N]",
+      "config": "[N]",
+      "docs": "[N]",
+      "infra": "[N]",
+      "security": "[N]",
+      "test": "[N]",
+      "observation": "[N]",
+      "deficiency": "[N]",
+      "ambiguity": "[N]"
+    }
+  }
+}
+```
 ```
 
 ## Output Examples
@@ -553,6 +769,46 @@ Critical issues include:
 - **AF-006** Error paths completely untested
 
 
+## Priority & Severity Mapping
+
+When generating the JSON OUTPUT section, map issues as follows:
+
+**Priority (for triage):**
+| Severity | Priority | Meaning |
+|----------|----------|---------|
+| Critical | `critical` | Blocks progression, must fix now |
+| High | `critical` | Should fix before next phase |
+| Medium | `suggested` | Should fix soon |
+| Low | `backlog` | Optional improvement |
+| Info | `backlog` | Informational only |
+
+**Severity is derived from failure_code suffix:**
+| Suffix | Severity | Priority |
+|--------|----------|----------|
+| `/C` | critical | critical |
+| `/H` | high | critical |
+| `/M` | medium | suggested |
+| `/L` | low | backlog |
+| `/I` | info | backlog |
+
+## Failure Code Selection
+
+**1. Use the default code from the criterion that failed** (e.g., `→ SEM-COM/H`)
+
+**2. Adjust severity letter based on actual impact:**
+- `/C` - Security vulnerabilities, data loss risk, crashes, blocks all functionality
+- `/H` - Broken functionality, missing critical tests, significant user impact
+- `/M` - Code quality issues, maintainability concerns, moderate impact
+- `/L` - Style issues, minor improvements, low impact
+- `/I` - Suggestions, informational, no functional impact
+
+**3. Consider context when adjusting:**
+- A naming issue in a public API → elevate to `/M` or `/H`
+- A complexity issue in rarely-used code → may stay at `/L`
+- Missing error handling in user-facing code → `/H` or `/C`
+- Missing error handling in internal utility → `/M`
+
+
 ## Edge Case Handling
 
 ### No test files
@@ -603,6 +859,10 @@ Critical issues include:
 ### Position in Pipeline
 **Runs after:** code-validator
 
+### Handoff: What This Agent Passes Downstream
+
+### Handoff: What This Agent Expects From Predecessors
+**From code-validator:** Validation results from code-validator
 
 ---
 
@@ -617,3 +877,7 @@ A small number of excellent tests beats many poor tests
 Focus on tests that would actually catch bugs
 Show concrete improvements, not just problems
 Use mutation analysis to prove test effectiveness
+
+
+---
+*Generated from ADL v1.16.0 | Agent: test-architect v1.7.0*
